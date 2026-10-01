@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, Modal, Keyboard, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, Modal, KeyboardAvoidingView, Pressable, TouchableWithoutFeedback, Alert } from 'react-native';
 
 import {
   startDB, createCard, getCards, updateCard, deleteCard,
-  createNote, getNotesByCard, updateNote, deleteNote
+  createNote, getNotesByCard, updateNote, deleteNote, getNoteCount
 } from "./src/db";
 
 type Card = {
@@ -13,13 +13,14 @@ type Card = {
 
 type Note = {
   id: number,
-  descricao: string,
   cardId: number,
+  descricao: string,
 };
 
 export default function App() {
 
   const [cards, setCards] = useState<Card[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [modalNewCard, setModalNewCard] = useState(false);
   const [descricao, setDescricao] = useState('');
@@ -40,8 +41,10 @@ export default function App() {
     load()
   }, []);
 
-  function handleNote(cardId: number) {
+  async function handleNote(cardId: number) {
     setSelectedCardId(cardId);
+    const data = await getNotesByCard(cardId)
+    setNotes(data);
     setDescricao('');
   }
 
@@ -75,6 +78,32 @@ export default function App() {
     }
   }
 
+  async function handleDeleteCard(id: number) {
+    try {
+      const counter = await getNoteCount(id);
+
+      if (counter > 0) {
+        Alert.alert("AVISO!", "Para deletar um card delete as notas anexadas a ele.");
+        return;
+      }
+
+      await deleteCard(id);
+      Alert.alert("Sucesso!", "Card deletado do banco de dados.");
+    } catch (error) {
+      Alert.alert("ERRO", "" + error);
+      console.error("Erro: ", error);
+    }
+  }
+
+  async function handleDeleteNote(id: number) {
+    try {
+      await deleteNote(id);
+    } catch (error) {
+      Alert.alert("Erro", "" + error);
+      console.error("Erro: ", error);
+    }
+  }
+
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
       <View style={styles.container}>
@@ -90,42 +119,93 @@ export default function App() {
           data={cards}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.card}
-              onPress={() => handleNote(item.id)}>
-              <Text style={styles.cardTitle}>
-                {item.titulo}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.card}>
+              <View style={styles.cardRow}>
+                <TouchableOpacity style={styles.cardContent}
+                  onPress={() => handleNote(item.id)}>
+                  <Text style={styles.cardTitle}>
+                    {item.titulo}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => { handleDeleteCard(item.id) }}>
+                  <Text style={styles.deleteButtonText}>❌</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           )}
         />
 
-        {selectedCardId !== null && (
-          <View style={styles.noteContainer}>
-            <Text style={styles.noteTitle}>
-              Nova Nota
-            </Text>
+        <Modal
+          visible={selectedCardId !== null}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setSelectedCardId(null)}
+        >
+          <TouchableWithoutFeedback onPress={() => setSelectedCardId(null)}>
+            <View style={styles.modalOverlay}>
+              <TouchableWithoutFeedback>
+                <View style={styles.noteContainer}>
 
-            <TextInput style={styles.textArea}
-              placeholder="Digite sua nota..."
-              placeholderTextColor="#999"
-              value={descricao}
-              onChangeText={setDescricao}
-              multiline
-              textAlignVertical="top" />
+                  <Text style={styles.noteTitle}>
+                    Notas
+                  </Text>
 
-            <TouchableOpacity style={styles.button}
-              onPress={handleSaveNote}>
-              <Text style={styles.buttonText}>
-                Salvar Nota
-              </Text>
-            </TouchableOpacity>
-          </View>
-        )}
+                  {/* Notas existentes */}
+                  <View style={styles.notesList}>
+                    {notes.map((note) => (
+                      <View key={note.id} style={styles.noteItem}>
+                        <Text style={styles.noteText}>
+                          {note.descricao}
+                        </Text>
+
+                        <TouchableOpacity
+                          style={styles.deleteNoteButton}
+                          onPress={() => { deleteNote(note.id) }}
+                        >
+                          <Text style={styles.deleteNoteButtonText}>
+                            Excluir
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+
+                  {/* Nova nota */}
+                  <TextInput
+                    style={styles.textArea}
+                    placeholder="Digite sua nota..."
+                    placeholderTextColor="#999"
+                    value={descricao}
+                    onChangeText={setDescricao}
+                    multiline
+                    textAlignVertical="top"
+                  />
+
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => {
+                      handleSaveNote();
+                      setSelectedCardId(null);
+                    }}
+                  >
+                    <Text style={styles.buttonText}>
+                      Salvar Nota
+                    </Text>
+                  </TouchableOpacity>
+
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
 
         <Modal
           visible={modalNewCard}
           transparent
-          animationType="fade"
+          animationType="slide"
           onRequestClose={() => setModalNewCard(false)}
         >
           <View style={styles.modalOverlay}>
@@ -197,8 +277,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 4,
-
-
   },
 
   addButtonText: {
@@ -221,8 +299,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 5,
     elevation: 2,
-
-
   },
 
   cardTitle: {
@@ -231,11 +307,36 @@ const styles = StyleSheet.create({
     color: '#1F2937',
   },
 
+  cardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  cardContent: {
+    flex: 1,
+  },
+
+  deleteButton: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginLeft: 12,
+  },
+
+  deleteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+
   noteContainer: {
     backgroundColor: '#FFFFFF',
     marginTop: 15,
     padding: 18,
     borderRadius: 16,
+    width: '90%',
 
     shadowColor: '#000',
     shadowOffset: {
@@ -245,8 +346,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 5,
     elevation: 2,
-
-
   },
 
   noteTitle: {
@@ -283,8 +382,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 3,
-
-
   },
 
   buttonText: {
@@ -315,8 +412,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 10,
     elevation: 8,
-
-
   },
 
   modalTitle: {
@@ -377,4 +472,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  notesList: {
+    marginBottom: 15,
+  },
+
+  noteItem: {
+    backgroundColor: '#F9FAFB',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 10,
+  },
+
+  noteText: {
+    fontSize: 15,
+    color: '#374151',
+    marginBottom: 10,
+  },
+
+  deleteNoteButton: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#EF4444',
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+
+  deleteNoteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  }
 });
