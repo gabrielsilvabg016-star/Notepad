@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList, Modal, KeyboardAvoidingView, Pressable, TouchableWithoutFeedback, Alert } from 'react-native';
+import {
+  StyleSheet, Text, View, TextInput, TouchableOpacity,
+  FlatList, Modal, KeyboardAvoidingView,
+  Pressable, TouchableWithoutFeedback, Alert
+} from 'react-native';
 
 import {
   startDB, createCard, getCards, updateCard, deleteCard,
   createNote, getNotesByCard, updateNote, deleteNote, getNoteCount
-} from "./src/db";
+} from "./src/database";
 
 type Card = {
   id: number,
@@ -22,7 +26,10 @@ export default function App() {
   const [cards, setCards] = useState<Card[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
+  const [editedCard, setEditedCard] = useState<Card | null>(null);
   const [modalNewCard, setModalNewCard] = useState(false);
+  const [modalOptions, setModalOptions] = useState(false);
+  const [modalEditor, setModalEditor] = useState(false);
   const [descricao, setDescricao] = useState('');
   const [titulo, setTitulo] = useState('');
 
@@ -30,9 +37,7 @@ export default function App() {
     async function load() {
       try {
         await startDB();
-
-        const data = await getCards();
-        setCards(data);
+        await loadCards();
       } catch (error) {
         console.error("Erro:", error);
       }
@@ -41,22 +46,30 @@ export default function App() {
     load()
   }, []);
 
-  async function handleNote(cardId: number) {
-    setSelectedCardId(cardId);
-    const data = await getNotesByCard(cardId)
-    setNotes(data);
-    setDescricao('');
+  function handleLongPress(card: Card) {
+    setEditedCard(card);
+    setModalOptions(true);
   }
 
-  async function handleSaveNote() {
-    if (!descricao.trim() || selectedCardId === null) {
-      return;
+  async function loadCards() {
+    try {
+
+      const data = await getCards();
+      setCards(data);
+    } catch (error) {
+      Alert.alert("Erro", "" + error);
+      console.error("ERRO:", error);
     }
+  }
 
-    await createNote(selectedCardId, descricao);
-
-    setDescricao('');
-    setSelectedCardId(null);
+  async function loadNotes(cardId: number){
+    try{
+      const data = await getNotesByCard(cardId);
+      setNotes(data);
+    }catch(error){
+      Alert.alert("Erro", ""+error);
+      console.error("ERRO: ", error);
+    }
   }
 
   async function handleCreateCard() {
@@ -66,10 +79,8 @@ export default function App() {
 
     try {
       await createCard(titulo);
+      await loadCards();
 
-      const data = await getCards();
-
-      setCards(data);
       setTitulo('');
       setModalNewCard(false);
 
@@ -88,6 +99,7 @@ export default function App() {
       }
 
       await deleteCard(id);
+      await loadCards();
       Alert.alert("Sucesso!", "Card deletado do banco de dados.");
     } catch (error) {
       Alert.alert("ERRO", "" + error);
@@ -95,12 +107,76 @@ export default function App() {
     }
   }
 
+  async function handleUpdateCard(id: number, titulo: string) {
+    if (titulo.trim() === "") {
+      Alert.alert("Erro", "O titulo não pode estar vazio");
+      return;
+    }
+
+    try {
+      await updateCard(id, titulo);
+      setTitulo("");
+      await loadCards();
+    } catch (error) {
+      Alert.alert("ERRO:", "" + error);
+      console.error("ERRO: ", error);
+    }
+  }
+
+  async function handleNote(cardId: number) {
+    setSelectedCardId(cardId);
+    setDescricao('');
+
+    await loadNotes(cardId);
+  }
+
+  async function handleSaveNote() {
+    if (!descricao.trim() || selectedCardId === null) {
+      return;
+    }
+
+    try{
+      await createNote(selectedCardId, descricao);
+
+      await loadNotes(selectedCardId);
+
+      setDescricao('');
+      
+    }catch(error){
+      Alert.alert("Erro", ""+error);
+      console.error("ERRO:", error);
+    }
+  }
+
   async function handleDeleteNote(id: number) {
+    if(!selectedCardId){
+      return;
+    }
+
     try {
       await deleteNote(id);
+      await loadNotes(selectedCardId);
+
+      Alert.alert("Sucesso!", "Nota deletada do banco de dados.");
     } catch (error) {
       Alert.alert("Erro", "" + error);
       console.error("Erro: ", error);
+    }
+  }
+
+  async function handleUpdateNote(id: number, descricao: string) {
+    if(!selectedCardId){
+      return;
+    }
+
+    try{
+      await updateNote(id, descricao);
+      await loadNotes(selectedCardId);
+      setDescricao("");
+      Alert.alert("Sucesso!", "Nota editada");
+    }catch(error){
+      Alert.alert("Erro", ""+error);
+      console.error("ERRO: ", error);
     }
   }
 
@@ -122,7 +198,9 @@ export default function App() {
             <View style={styles.card}>
               <View style={styles.cardRow}>
                 <TouchableOpacity style={styles.cardContent}
-                  onPress={() => handleNote(item.id)}>
+                  onPress={() => handleNote(item.id)}
+                  onLongPress={() => handleLongPress(item)}
+                  delayLongPress={500}>
                   <Text style={styles.cardTitle}>
                     {item.titulo}
                   </Text>
@@ -141,7 +219,7 @@ export default function App() {
         <Modal
           visible={selectedCardId !== null}
           transparent
-          animationType="slide"
+          animationType="fade"
           onRequestClose={() => setSelectedCardId(null)}
         >
           <TouchableWithoutFeedback onPress={() => setSelectedCardId(null)}>
@@ -163,10 +241,19 @@ export default function App() {
 
                         <TouchableOpacity
                           style={styles.deleteNoteButton}
-                          onPress={() => { deleteNote(note.id) }}
+                          onPress={() => { handleDeleteNote(note.id) }}
                         >
                           <Text style={styles.deleteNoteButtonText}>
                             Excluir
+                          </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity 
+                          style={styles.updateNoteButton}
+                          onPress={() => {handleUpdateNote(note.id, note.descricao)}}
+                        >
+                          <Text style={styles.updateNoteButtonText}>
+                            Editar
                           </Text>
                         </TouchableOpacity>
                       </View>
@@ -188,7 +275,6 @@ export default function App() {
                     style={styles.button}
                     onPress={() => {
                       handleSaveNote();
-                      setSelectedCardId(null);
                     }}
                   >
                     <Text style={styles.buttonText}>
@@ -235,6 +321,91 @@ export default function App() {
                   onPress={handleCreateCard}
                 >
                   <Text style={styles.createButtonText}>Criar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal
+          visible={modalOptions}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setModalOptions(false)}
+        >
+          <Pressable style={styles.cardOptionsContainer}
+            onPress={(event) => event.stopPropagation()}
+          >
+            <Text style={styles.cardOptionsTitle}>
+              {editedCard?.titulo}
+            </Text>
+
+            <TouchableOpacity style={styles.optionButton}
+              onPress={() => {
+                if (editedCard) {
+                  setTitulo(editedCard.titulo);
+                  setModalOptions(false);
+                  setModalEditor(true);
+                }
+              }}
+            >
+              <Text style={styles.optionButtonText}>
+                ✏️ Editar
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cancelOptionButton}
+              onPress={() => setModalOptions(false)}>
+              <Text style={styles.cancelOptionButtonText}>
+                Cancelar
+              </Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Modal>
+
+        <Modal
+          visible={modalEditor}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setModalEditor(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+
+              <Text style={styles.modalTitle}>Editar Card</Text>
+
+              <Text style={styles.inputLabel}>Titulo</Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Digite o novo Titulo..."
+                placeholderTextColor="#9CA3AF"
+                value={titulo}
+                onChangeText={setTitulo}
+              />
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={styles.cancelButton}
+                  onPress={() => setModalEditor(false)}>
+                  <Text style={styles.cancelButtonText}>
+                    Cancelar
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.createButton}
+                  onPress={async () => {
+                    if (!editedCard) {
+                      return;
+                    }
+
+                    await handleUpdateCard(editedCard.id, titulo);
+
+                    setModalEditor(false);
+                    setEditedCard(null);
+                  }}>
+                  <Text style={styles.createButtonText}>
+                    Salvar
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -503,5 +674,63 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '700',
-  }
+  },
+
+  updateNoteButton: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#08d52e',
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+  },
+
+  updateNoteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+
+  cardOptionsContainer: {
+    width: "85%",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+
+  cardOptionsTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#111827",
+    marginBottom: 20,
+  },
+
+  optionButton: {
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
+
+  optionButtonText: {
+    fontSize: 16,
+    color: "#111827",
+  },
+
+  cancelOptionButton: {
+    marginTop: 15,
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+
+  cancelOptionButtonText: {
+    fontSize: 16,
+    color: "#6B7280",
+  },
 });
