@@ -39,7 +39,7 @@ export async function createCard(titulo: string) {
 export async function getCards() {
     const db = await dbPromise;
 
-    return await db.getAllAsync<{id: number; titulo: string;}>(
+    return await db.getAllAsync<{ id: number; titulo: string; }>(
         "SELECT id, titulo FROM cards ORDER BY id DESC"
     );
 }
@@ -70,7 +70,7 @@ export async function createNote(cardId: number, descricao: string) {
 export async function getNotesByCard(cardId: number) {
     const db = await dbPromise;
 
-    return await db.getAllAsync<{id: number; cardId: number; descricao: string;}>(
+    return await db.getAllAsync<{ id: number; cardId: number; descricao: string; }>(
         `
         SELECT id, card_id AS cardId, descricao
         FROM notes
@@ -94,9 +94,9 @@ export async function deleteNote(id: number) {
 export async function getNoteCount(id: number) {
     const db = await dbPromise;
 
-    const result = await db.getFirstAsync<{count: number}>(
+    const result = await db.getFirstAsync<{ count: number }>(
         `SELECT COUNT(*) as count FROM notes WHERE card_id = ?`, id
     );
 
-    return result?.count ?? 0; 
+    return result?.count ?? 0;
 }
