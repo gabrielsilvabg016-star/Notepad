@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS notes (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 card_id INTEGER NOT NULL,
 descricao TEXT NOT NULL,
+titulo TEXT NOT NULL,
 FOREIGN KEY (card_id)
 REFERENCES cards(id)
 ON DELETE CASCADE
@@ -60,29 +61,29 @@ export async function deleteCard(id: number) {
 //NOTES//
 /////////
 
-export async function createNote(cardId: number, descricao: string) {
+export async function createNote(cardId: number, descricao: string, titulo: string) {
     const db = await dbPromise;
 
-    const result = await db.runAsync("INSERT INTO notes (card_id, descricao) VALUES (?, ?)", cardId, descricao);
+    const result = await db.runAsync("INSERT INTO notes (card_id, descricao, titulo) VALUES (?, ?, ?)", cardId, descricao, titulo);
     return result.lastInsertRowId;
 }
 
 export async function getNotesByCard(cardId: number) {
     const db = await dbPromise;
 
-    return await db.getAllAsync<{ id: number; cardId: number; descricao: string; }>(
+    return await db.getAllAsync<{ id: number; cardId: number; descricao: string; titulo: string; }>(
         `
-        SELECT id, card_id AS cardId, descricao
+        SELECT id, card_id AS cardId, descricao, titulo
         FROM notes
         WHERE card_id = ?
         ORDER BY id DESC
         `, cardId);
 }
 
-export async function updateNote(id: number, descricao: string) {
+export async function updateNote(id: number, descricao: string, titulo: string) {
     const db = await dbPromise;
 
-    await db.runAsync("UPDATE notes SET descricao = ? WHERE id = ?", descricao, id);
+    await db.runAsync("UPDATE notes SET descricao = ?, titulo = ? WHERE id = ?", descricao, titulo, id);
 }
 
 export async function deleteNote(id: number) {

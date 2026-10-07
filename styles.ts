@@ -3,63 +3,79 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F3F4F6',
-        paddingHorizontal: 20,
-        paddingTop: 60,
+        backgroundColor: '#111827',
+        paddingHorizontal: 16,
+        paddingTop: 48,
     },
 
     title: {
-        fontSize: 32,
-        fontWeight: '800',
-        color: '#111827',
+        fontSize: 28,
+        fontWeight: '700',
+        color: '#F3E7C3',
         marginBottom: 20,
+        letterSpacing: 0.5,
+
+        textShadowColor: '#000000',
+        textShadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        textShadowRadius: 4,
     },
 
     addButton: {
-        backgroundColor: '#4F46E5',
+        backgroundColor: '#26384D',
         paddingVertical: 14,
-        paddingHorizontal: 20,
-        borderRadius: 12,
+        paddingHorizontal: 18,
+        borderRadius: 4,
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 20,
+        marginBottom: 18,
 
-        shadowColor: '#4F46E5',
+        borderWidth: 1,
+        borderColor: '#8D7957',
+
+        shadowColor: '#000000',
         shadowOffset: {
             width: 0,
-            height: 4,
+            height: 3,
         },
-        shadowOpacity: 0.2,
-        shadowRadius: 6,
+        shadowOpacity: 0.35,
+        shadowRadius: 5,
         elevation: 4,
     },
 
     addButtonText: {
-        color: '#FFFFFF',
-        fontSize: 16,
+        color: '#E8D7AA',
+        fontSize: 15,
         fontWeight: '700',
+        letterSpacing: 0.8,
     },
 
     card: {
-        backgroundColor: '#FFFFFF',
-        padding: 20,
-        borderRadius: 16,
+        backgroundColor: '#1B2736',
+        padding: 17,
+        borderRadius: 5,
         marginBottom: 12,
 
-        shadowColor: '#000',
+        borderWidth: 1,
+        borderColor: '#35465A',
+
+        shadowColor: '#000000',
         shadowOffset: {
             width: 0,
-            height: 2,
+            height: 3,
         },
-        shadowOpacity: 0.08,
-        shadowRadius: 5,
-        elevation: 2,
+        shadowOpacity: 0.35,
+        shadowRadius: 6,
+        elevation: 4,
     },
 
     cardTitle: {
         fontSize: 18,
         fontWeight: '700',
-        color: '#1F2937',
+        color: '#E9EDF2',
+        letterSpacing: 0.3,
     },
 
     cardRow: {
@@ -70,129 +86,160 @@ export const styles = StyleSheet.create({
 
     cardContent: {
         flex: 1,
+        paddingRight: 10,
     },
 
     deleteButton: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#302126',
         paddingVertical: 8,
         paddingHorizontal: 12,
-        borderRadius: 8,
+        borderRadius: 4,
         marginLeft: 12,
+
+        borderWidth: 1,
+        borderColor: '#74464B',
     },
 
     deleteButtonText: {
-        color: '#FFFFFF',
-        fontSize: 14,
+        color: '#D98B8B',
+        fontSize: 13,
         fontWeight: '700',
     },
 
     noteContainer: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#182333',
         marginTop: 15,
         padding: 18,
-        borderRadius: 16,
-        width: '90%',
+        borderRadius: 5,
+        width: '94%',
 
-        shadowColor: '#000',
+        borderWidth: 1,
+        borderColor: '#3A4B60',
+
+        shadowColor: '#000000',
         shadowOffset: {
             width: 0,
-            height: 2,
+            height: 4,
         },
-        shadowOpacity: 0.08,
-        shadowRadius: 5,
-        elevation: 2,
+        shadowOpacity: 0.4,
+        shadowRadius: 8,
+        elevation: 5,
     },
 
     noteTitle: {
         fontSize: 20,
-        fontWeight: '800',
-        color: '#111827',
+        fontWeight: '700',
+        color: '#F0E2BD',
+        marginBottom: 13,
+        letterSpacing: 0.4,
+    },
+
+    noteTitleInput: {
+        height: 48,
+        backgroundColor: '#101923',
+        borderWidth: 1,
+        borderColor: '#465A70',
+        borderRadius: 4,
+        paddingHorizontal: 13,
+        fontSize: 15,
+        color: '#E9EDF2',
         marginBottom: 12,
     },
 
     textArea: {
         height: 150,
-        backgroundColor: '#F9FAFB',
+        backgroundColor: '#101923',
         borderWidth: 1,
-        borderColor: '#E5E7EB',
-        borderRadius: 12,
-        padding: 15,
-        fontSize: 16,
-        color: '#111827',
+        borderColor: '#465A70',
+        borderRadius: 4,
+        padding: 14,
+        fontSize: 15,
+        color: '#E9EDF2',
+
+        textAlignVertical: 'top',
     },
 
     button: {
-        marginTop: 12,
-        backgroundColor: '#4F46E5',
-        paddingVertical: 15,
-        borderRadius: 12,
+        marginTop: 13,
+        backgroundColor: '#536F8C',
+        paddingVertical: 14,
+        borderRadius: 4,
         alignItems: 'center',
         justifyContent: 'center',
 
-        shadowColor: '#4F46E5',
+        borderWidth: 1,
+        borderColor: '#7890AA',
+
+        shadowColor: '#000000',
         shadowOffset: {
             width: 0,
             height: 3,
         },
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.3,
         shadowRadius: 5,
-        elevation: 3,
+        elevation: 4,
     },
 
     buttonText: {
-        color: '#FFFFFF',
-        fontSize: 16,
+        color: '#F4E9CB',
+        fontSize: 15,
         fontWeight: '700',
+        letterSpacing: 0.5,
     },
 
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(4, 9, 16, 0.78)',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 20,
+        padding: 16,
     },
 
     modalContainer: {
         width: '100%',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 20,
-        padding: 24,
+        backgroundColor: '#182333',
+        borderRadius: 6,
+        padding: 21,
 
-        shadowColor: '#000',
+        borderWidth: 1,
+        borderColor: '#7B6B4E',
+
+        shadowColor: '#000000',
         shadowOffset: {
             width: 0,
-            height: 5,
+            height: 7,
         },
-        shadowOpacity: 0.2,
-        shadowRadius: 10,
-        elevation: 8,
+        shadowOpacity: 0.5,
+        shadowRadius: 12,
+        elevation: 10,
     },
 
     modalTitle: {
-        fontSize: 24,
-        fontWeight: '800',
-        color: '#111827',
+        fontSize: 22,
+        fontWeight: '700',
+        color: '#F0E2BD',
         marginBottom: 20,
+        letterSpacing: 0.4,
     },
 
     inputLabel: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#374151',
+        fontSize: 13,
+        fontWeight: '700',
+        color: '#B8C5D4',
         marginBottom: 7,
+        letterSpacing: 0.3,
     },
 
     input: {
-        height: 50,
-        backgroundColor: '#F9FAFB',
+        height: 49,
+        backgroundColor: '#101923',
         borderWidth: 1,
-        borderColor: '#D1D5DB',
-        borderRadius: 12,
-        paddingHorizontal: 15,
-        fontSize: 16,
-        color: '#111827',
-        marginBottom: 20,
+        borderColor: '#465A70',
+        borderRadius: 4,
+        paddingHorizontal: 14,
+        fontSize: 15,
+        color: '#E9EDF2',
+        marginBottom: 18,
     },
 
     modalButtons: {
@@ -202,123 +249,157 @@ export const styles = StyleSheet.create({
 
     cancelButton: {
         flex: 1,
-        backgroundColor: '#F3F4F6',
-        paddingVertical: 14,
-        borderRadius: 12,
+        backgroundColor: '#202B38',
+        paddingVertical: 13,
+        borderRadius: 4,
         alignItems: 'center',
+        justifyContent: 'center',
+
+        borderWidth: 1,
+        borderColor: '#465363',
     },
 
     cancelButtonText: {
-        color: '#374151',
-        fontSize: 16,
+        color: '#AEB9C6',
+        fontSize: 15,
         fontWeight: '700',
     },
 
     createButton: {
         flex: 1,
-        backgroundColor: '#4F46E5',
-        paddingVertical: 14,
-        borderRadius: 12,
+        backgroundColor: '#536F8C',
+        paddingVertical: 13,
+        borderRadius: 4,
         alignItems: 'center',
+        justifyContent: 'center',
+
+        borderWidth: 1,
+        borderColor: '#7890AA',
+
+        shadowColor: '#000000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 3,
     },
 
     createButtonText: {
-        color: '#FFFFFF',
-        fontSize: 16,
+        color: '#F4E9CB',
+        fontSize: 15,
         fontWeight: '700',
     },
+
     notesList: {
         marginBottom: 15,
         maxHeight: 300,
     },
+
     notesListContent: {
         paddingBottom: 10,
     },
 
     noteItem: {
-        backgroundColor: '#F9FAFB',
+        backgroundColor: '#101923',
         borderWidth: 1,
-        borderColor: '#E5E7EB',
-        borderRadius: 12,
-        padding: 12,
-        marginBottom: 10,
+        borderColor: '#35465A',
+        borderRadius: 4,
+        padding: 13,
+        marginBottom: 9,
     },
 
     noteText: {
-        fontSize: 15,
-        color: '#374151',
+        fontSize: 14,
+        lineHeight: 21,
+        color: '#C7D0DA',
         marginBottom: 10,
     },
 
     deleteNoteButton: {
         alignSelf: 'flex-end',
-        backgroundColor: '#EF4444',
+        backgroundColor: '#302126',
         paddingVertical: 7,
-        paddingHorizontal: 12,
-        borderRadius: 8,
+        paddingHorizontal: 11,
+        borderRadius: 4,
+
+        borderWidth: 1,
+        borderColor: '#74464B',
     },
 
     deleteNoteButtonText: {
-        color: '#FFFFFF',
-        fontSize: 13,
+        color: '#D98B8B',
+        fontSize: 12,
         fontWeight: '700',
     },
 
     updateNoteButton: {
         alignSelf: 'flex-end',
-        backgroundColor: '#08d52e',
+        backgroundColor: '#1D3440',
         paddingVertical: 7,
-        paddingHorizontal: 12,
-        borderRadius: 8,
+        paddingHorizontal: 11,
+        borderRadius: 4,
+
+        borderWidth: 1,
+        borderColor: '#4C8295',
     },
 
     updateNoteButtonText: {
-        color: '#FFFFFF',
-        fontSize: 13,
+        color: '#8FC6D4',
+        fontSize: 12,
         fontWeight: '700',
     },
 
     cardOptionsContainer: {
-        width: "85%",
-        backgroundColor: "#fff",
-        borderRadius: 16,
-        padding: 20,
-        elevation: 5,
-        shadowColor: "#000",
+        width: '88%',
+        backgroundColor: '#182333',
+        borderRadius: 6,
+        padding: 21,
+
+        borderWidth: 1,
+        borderColor: '#7B6B4E',
+
+        shadowColor: '#000000',
         shadowOffset: {
             width: 0,
-            height: 2,
+            height: 6,
         },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
+        shadowOpacity: 0.5,
+        shadowRadius: 12,
+        elevation: 8,
     },
 
     cardOptionsTitle: {
-        fontSize: 18,
-        fontWeight: "bold",
-        color: "#111827",
-        marginBottom: 20,
+        fontSize: 19,
+        fontWeight: '700',
+        color: '#F0E2BD',
+        marginBottom: 18,
+        letterSpacing: 0.4,
     },
 
     optionButton: {
         paddingVertical: 15,
         borderBottomWidth: 1,
-        borderBottomColor: "#E5E7EB",
+        borderBottomColor: '#35465A',
     },
 
     optionButtonText: {
-        fontSize: 16,
-        color: "#111827",
+        fontSize: 15,
+        color: '#D5DDE5',
+        fontWeight: '600',
     },
 
     cancelOptionButton: {
-        marginTop: 15,
+        marginTop: 14,
         paddingVertical: 12,
-        alignItems: "center",
+        alignItems: 'center',
     },
 
     cancelOptionButtonText: {
-        fontSize: 16,
-        color: "#6B7280",
+        fontSize: 15,
+        color: '#8793A0',
+        fontWeight: '600',
     },
 });
+

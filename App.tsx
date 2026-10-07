@@ -20,6 +20,7 @@ type Card = {
 type Note = {
   id: number,
   cardId: number,
+  titulo: string,
   descricao: string,
 };
 
@@ -130,21 +131,23 @@ export default function App() {
   async function handleNote(cardId: number) {
     setSelectedCardId(cardId);
     setDescricao('');
+    setTitulo('');
 
     await loadNotes(cardId);
   }
 
   async function handleSaveNote() {
-    if (!descricao.trim() || selectedCardId === null) {
+    if (!descricao.trim() || selectedCardId === null || !titulo.trim()) {
       return;
     }
 
     try {
       if (editandoNota && notaEditandoId !== null) {
-        await updateNote(notaEditandoId, descricao);
+        await updateNote(notaEditandoId, descricao, titulo);
         await loadNotes(selectedCardId);
 
         setDescricao('');
+        setTitulo('');
         setEditandoNota(false);
         setNotaEditandoId(null);
 
@@ -153,11 +156,12 @@ export default function App() {
         return;
       }
 
-      await createNote(selectedCardId, descricao);
+      await createNote(selectedCardId, descricao, titulo);
 
       await loadNotes(selectedCardId);
 
       setDescricao('');
+      setTitulo('');
 
     } catch (error) {
       Alert.alert("Erro", "" + error);
@@ -209,6 +213,7 @@ export default function App() {
           )}
         />
 
+        {/*Notas*/}
         <Modal
           visible={selectedCardId !== null}
           transparent
@@ -230,6 +235,9 @@ export default function App() {
                     showsVerticalScrollIndicator={true}>
                     {notes.map((note) => (
                       <View key={note.id} style={styles.noteItem}>
+                        <Text style={styles.noteTitle}>
+                          {note.titulo}
+                        </Text>
                         <Text style={styles.noteText}>
                           {note.descricao}
                         </Text>
@@ -249,6 +257,7 @@ export default function App() {
                             setEditandoNota(true)
                             setNotaEditandoId(note.id);
                             setDescricao(note.descricao)
+                            setTitulo(note.titulo)
                           }}
                         >
                           <Text style={styles.updateNoteButtonText}>
@@ -260,6 +269,14 @@ export default function App() {
                   </ScrollView>
 
                   {/* Nova nota */}
+                  <TextInput
+                    style={styles.noteTitleInput}
+                    placeholder="Titulo para a Nota"
+                    placeholderTextColor="#999"
+                    value={titulo}
+                    onChangeText={setTitulo}
+                  />
+
                   <TextInput
                     style={styles.textArea}
                     placeholder="Digite sua nota..."
@@ -287,6 +304,7 @@ export default function App() {
           </TouchableWithoutFeedback>
         </Modal>
 
+        {/*Criar Card*/}
         <Modal
           visible={modalNewCard}
           transparent
@@ -326,7 +344,8 @@ export default function App() {
           </View>
         </Modal>
 
-        <Modal
+        {/*Opções de longPress*/}
+        <Modal 
           visible={modalOptions}
           transparent
           animationType="fade"
