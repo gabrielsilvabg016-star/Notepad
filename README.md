@@ -1,3 +1,4 @@
-<h3>NotePad</h3>
+<h3>Bibliotecas usadas</h3>
 
-<p>Aplicativo simples usando typescript, react-native e expo para desenvolver um bloco de notas para celulares</p>
+<p>Expo-sqlite</p>
+<p>React-Native-Reanimated</p>
