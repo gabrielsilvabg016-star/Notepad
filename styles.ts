@@ -3,9 +3,17 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#111827',
         paddingHorizontal: 16,
         paddingTop: 48,
+    },
+
+    background: {
+        flex:1,
+    },
+
+    overlay:{
+        flex:1,
+        backgroundColor: 'rgba(7, 13, 22, 0.70)',
     },
 
     title: {
