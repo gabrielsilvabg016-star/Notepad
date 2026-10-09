@@ -9,6 +9,12 @@ export const styles = StyleSheet.create({
 
     background: {
         flex:1,
+        width:"100%",
+    },
+
+    image:{
+        height:"100%",
+        width:"100%",
     },
 
     overlay:{

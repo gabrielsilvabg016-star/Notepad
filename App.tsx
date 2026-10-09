@@ -196,9 +196,10 @@ export default function App() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
       <ImageBackground
-        source={require('./assets/thinkFast.jpg')}
+        source={require('./assets/bg-crystal.png')}
         style={styles.background}
-        resizeMode="cover">
+        resizeMode="cover"
+        imageStyle={styles.image}>
         <View style={styles.overlay}>
           <View style={styles.container}>
             <Text style={styles.title}>NotePad</Text>
