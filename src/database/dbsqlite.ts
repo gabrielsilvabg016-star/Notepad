@@ -5,24 +5,34 @@ const dbPromise = SQLite.openDatabaseAsync('notepad.db');
 export async function startDB() {
     const db = await dbPromise;
 
-    await db.execAsync(`
-PRAGMA foreign_keys = ON;
+await db.execAsync(`
+    PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS cards (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-titulo TEXT NOT NULL
-);
+    CREATE TABLE IF NOT EXISTS cards (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    titulo TEXT NOT NULL
+    );
 
-CREATE TABLE IF NOT EXISTS notes (
-id INTEGER PRIMARY KEY AUTOINCREMENT,
-card_id INTEGER NOT NULL,
-descricao TEXT NOT NULL,
-titulo TEXT NOT NULL,
-FOREIGN KEY (card_id)
-REFERENCES cards(id)
-ON DELETE CASCADE
-);
+    CREATE TABLE IF NOT EXISTS notes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    card_id INTEGER NOT NULL,
+    descricao TEXT NOT NULL,
+    titulo TEXT NOT NULL,
+    FOREIGN KEY (card_id)
+    REFERENCES cards(id)
+    ON DELETE CASCADE
+    );
 `);
+
+await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS sync_queue (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entity TEXT NOT NULL,
+    local_id INTEGER NOT NULL,
+    operation TEXT NOT NULL,
+    cloud_id TEXT NOT NULL,
+    payload TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);`);
 }
 
 /////////

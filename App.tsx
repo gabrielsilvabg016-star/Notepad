@@ -16,7 +16,7 @@ import Animated, {
 import {
   startDB, createCard, getCards, updateCard, deleteCard,
   createNote, getNotesByCard, updateNote, deleteNote, getNoteCount
-} from "./src/database";
+} from "./src/database/dbsqlite";
 
 import { styles } from "./styles";
 
