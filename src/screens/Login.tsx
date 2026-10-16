@@ -4,13 +4,23 @@ import {
     Alert, KeyboardAvoidingView, Platform, ScrollView, Modal
 } from 'react-native'
 
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/AppNavigator";
+
 import { Ionicons } from "@expo/vector-icons";
 
+type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-export default function Login() {
+
+export default function Login({ navigation }: Props) {
 
     const [registerVisible, setRegisterVisible] = useState(false);
     const [recoverVisible, setRecoverVisible] = useState(false);
+
+    function handleLogin() {
+        console.log("entrou no handle");
+        navigation.replace('Home');
+    }
 
     return (
         <View style={styles.container}>
@@ -29,7 +39,7 @@ export default function Login() {
                             <Ionicons name="lock-closed-outline" size={32} color="#FFFFFF" />
                         </View>
 
-                        <Text style={styles.title}>Bem-vindo de volta</Text>
+                        <Text style={styles.title}>Bem-vindo</Text>
 
                         <Text style={styles.subtitle}>
                             Entre na sua conta para continuar.
@@ -89,13 +99,13 @@ export default function Login() {
                         </View>
 
                         <Pressable
-                            onPress={() => { }}
+                            onPress={() => { handleLogin() }}
                             style={({ pressed }) => [
                                 styles.primaryButton,
                                 pressed && styles.buttonPressed,
                             ]}
                         >
-                            <Text style={styles.primaryButtonText}>Entrar na minha conta</Text>
+                            <Text style={styles.primaryButtonText}>Entrar</Text>
                             <Ionicons name="arrow-forward" size={19} color="#FFFFFF" />
                         </Pressable>
 

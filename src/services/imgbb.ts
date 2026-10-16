@@ -18,7 +18,7 @@ export const enviarImagemImgBB = async (
         }
     );
     const resultado = await response.json();
-    if(!response.ok || !resultado.success) {
+    if (!response.ok || !resultado.success) {
         console.log(
             'Erro ImgBB',
             resultado
