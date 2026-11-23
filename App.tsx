@@ -21,13 +21,13 @@ import {
 import { styles } from "./styles";
 
 type Card = {
-  id: number,
+  id: string,
   titulo: string,
 };
 
 type Note = {
-  id: number,
-  cardId: number,
+  id: string,
+  cardId: string,
   titulo: string,
   descricao: string,
 };
@@ -36,9 +36,9 @@ export default function App() {
 
   const [cards, setCards] = useState<Card[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [editedCard, setEditedCard] = useState<Card | null>(null);
-  const [notaEditandoId, setNotaEditandoId] = useState<number | null>(null);
+  const [notaEditandoId, setNotaEditandoId] = useState<string | null>(null);
   const [editandoNota, setEditandoNota] = useState(false);
   const [modalNewCard, setModalNewCard] = useState(false);
   const [modalOptions, setModalOptions] = useState(false);
@@ -75,7 +75,7 @@ export default function App() {
     }
   }
 
-  async function loadNotes(cardId: number) {
+  async function loadNotes(cardId: string) {
     try {
       const data = await getNotesByCard(cardId);
       setNotes(data);
@@ -102,7 +102,7 @@ export default function App() {
     }
   }
 
-  async function handleDeleteCard(id: number) {
+  async function handleDeleteCard(id: string) {
     try {
       const counter = await getNoteCount(id);
 
@@ -120,7 +120,7 @@ export default function App() {
     }
   }
 
-  async function handleUpdateCard(id: number, titulo: string) {
+  async function handleUpdateCard(id: string, titulo: string) {
     if (titulo.trim() === "") {
       Alert.alert("Erro", "O titulo não pode estar vazio");
       return;
@@ -136,7 +136,7 @@ export default function App() {
     }
   }
 
-  async function handleNote(cardId: number) {
+  async function handleNote(cardId: string) {
     setDescricao('');
     setTitulo('');
     setEditandoNota(false);
@@ -179,7 +179,7 @@ export default function App() {
     }
   }
 
-  async function handleDeleteNote(id: number) {
+  async function handleDeleteNote(id: string) {
     if (!selectedCardId) {
       return;
     }
