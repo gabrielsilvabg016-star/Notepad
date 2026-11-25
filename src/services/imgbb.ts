@@ -1,4 +1,4 @@
-const IMGBB_API_KEY = '14ec2963cb8fc44320d0674c7be38801';
+const IMGBB_API_KEY = '3d8198ac8d742c5d75498c4a1dcf81a1';
 
 export const enviarImagemImgBB = async (
     imagemBase64: string

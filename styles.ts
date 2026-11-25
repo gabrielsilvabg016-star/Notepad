@@ -37,6 +37,34 @@ export const styles = StyleSheet.create({
         textShadowRadius: 4,
     },
 
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+
+    userEmail: {
+        color: '#B8C5D4',
+        fontSize: 13,
+        marginTop: -14,
+        marginBottom: 16,
+    },
+
+    signOutButton: {
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderWidth: 1,
+        borderColor: '#465363',
+        borderRadius: 4,
+        marginBottom: 20,
+    },
+
+    signOutText: {
+        color: '#B8C5D4',
+        fontSize: 13,
+        fontWeight: '700',
+    },
+
     addButton: {
         backgroundColor: '#26384D',
         paddingVertical: 14,
@@ -92,6 +120,56 @@ export const styles = StyleSheet.create({
         letterSpacing: 0.3,
     },
 
+    cardIconContainer: {
+        width: 44,
+        height: 44,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
+        borderRadius: 5,
+        backgroundColor: '#101923',
+        borderWidth: 1,
+        borderColor: '#465A70',
+    },
+
+    cardIcon: {
+        fontSize: 23,
+    },
+
+    iconPicker: {
+        flexDirection: 'row',
+        gap: 8,
+        marginBottom: 18,
+    },
+
+    iconChoice: {
+        flex: 1,
+        minHeight: 68,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 8,
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: '#465363',
+        backgroundColor: '#101923',
+    },
+
+    iconChoiceSelected: {
+        borderColor: '#D5B875',
+        backgroundColor: '#26384D',
+    },
+
+    iconChoiceGlyph: {
+        fontSize: 21,
+        marginBottom: 4,
+    },
+
+    iconChoiceLabel: {
+        color: '#D5DDE5',
+        fontSize: 11,
+        fontWeight: '600',
+    },
+
     cardRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -101,6 +179,8 @@ export const styles = StyleSheet.create({
     cardContent: {
         flex: 1,
         paddingRight: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
 
     deleteButton: {
@@ -148,6 +228,17 @@ export const styles = StyleSheet.create({
         letterSpacing: 0.4,
     },
 
+    noteTypeHint: {
+        color: '#9CA3AF',
+        fontSize: 12,
+        marginTop: -9,
+        marginBottom: 12,
+    },
+
+    dateInputGroup: {
+        marginBottom: 12,
+    },
+
     noteTitleInput: {
         height: 48,
         backgroundColor: '#101923',
@@ -158,6 +249,16 @@ export const styles = StyleSheet.create({
         fontSize: 15,
         color: '#E9EDF2',
         marginBottom: 12,
+    },
+
+    noteComposerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+    },
+
+    noteTitleInputInRow: {
+        flex: 1,
     },
 
     textArea: {
@@ -171,6 +272,47 @@ export const styles = StyleSheet.create({
         color: '#E9EDF2',
 
         textAlignVertical: 'top',
+    },
+
+    imagePickerButton: {
+        width: 88,
+        height: 88,
+        marginBottom: 6,
+        borderRadius: 4,
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        borderColor: '#60758A',
+        backgroundColor: '#101923',
+        overflow: 'hidden',
+    },
+
+    imagePickerPlaceholder: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    imagePickerGlyph: {
+        color: '#D5DDE5',
+        fontSize: 22,
+    },
+
+    imagePickerText: {
+        color: '#B8C5D4',
+        fontSize: 11,
+        fontWeight: '600',
+    },
+
+    selectedNoteImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+
+    imagePickerHint: {
+        color: '#9CA3AF',
+        fontSize: 11,
+        marginBottom: 12,
     },
 
     button: {
@@ -324,11 +466,73 @@ export const styles = StyleSheet.create({
         marginBottom: 9,
     },
 
+    noteRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+
+    noteImagePlaceholder: {
+        width: 64,
+        minHeight: 64,
+        marginRight: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 4,
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        borderColor: '#60758A',
+        backgroundColor: '#182333',
+    },
+
+    noteImageGlyph: {
+        color: '#B8C5D4',
+        fontSize: 20,
+        lineHeight: 22,
+    },
+
+    noteImageLabel: {
+        color: '#9CA3AF',
+        fontSize: 10,
+    },
+
+    noteContent: {
+        flex: 1,
+    },
+
     noteText: {
         fontSize: 14,
         lineHeight: 21,
         color: '#C7D0DA',
         marginBottom: 10,
+    },
+
+    checklistItems: {
+        marginBottom: 10,
+    },
+
+    checklistItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        minHeight: 36,
+        paddingVertical: 5,
+    },
+
+    checklistCheck: {
+        color: '#D5DDE5',
+        fontSize: 20,
+        marginRight: 10,
+    },
+
+    checklistItemText: {
+        flex: 1,
+        color: '#C7D0DA',
+        fontSize: 14,
+        lineHeight: 20,
+    },
+
+    checklistItemChecked: {
+        color: '#8794A3',
+        textDecorationLine: 'line-through',
     },
 
     deleteNoteButton: {
@@ -415,5 +619,86 @@ export const styles = StyleSheet.create({
         color: '#8793A0',
         fontWeight: '600',
     },
-});
 
+    authContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        padding: 20,
+    },
+
+    authCard: {
+        width: '100%',
+        maxWidth: 420,
+        alignSelf: 'center',
+        backgroundColor: '#182333',
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: '#7B6B4E',
+        padding: 22,
+    },
+
+    authTitle: {
+        color: '#F3E7C3',
+        fontSize: 28,
+        fontWeight: '700',
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+
+    authHeading: {
+        color: '#F0E2BD',
+        fontSize: 20,
+        fontWeight: '700',
+        marginBottom: 20,
+        textAlign: 'center',
+    },
+
+    authInput: {
+        height: 49,
+        backgroundColor: '#101923',
+        borderWidth: 1,
+        borderColor: '#465A70',
+        borderRadius: 4,
+        paddingHorizontal: 14,
+        fontSize: 15,
+        color: '#E9EDF2',
+        marginBottom: 14,
+    },
+
+    authError: {
+        color: '#F0A5A5',
+        fontSize: 14,
+        marginBottom: 14,
+    },
+
+    authSubmitButton: {
+        backgroundColor: '#536F8C',
+        minHeight: 48,
+        paddingVertical: 13,
+        borderRadius: 4,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#7890AA',
+    },
+
+    authDisabledButton: {
+        opacity: 0.65,
+    },
+
+    authSubmitText: {
+        color: '#F4E9CB',
+        fontSize: 15,
+        fontWeight: '700',
+    },
+
+    authToggleButton: {
+        paddingVertical: 16,
+        alignItems: 'center',
+    },
+
+    authToggleText: {
+        color: '#B8C5D4',
+        fontSize: 14,
+    },
+});
