@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
+
 import {
-  Text, View, TextInput, TouchableOpacity,
+  ActivityIndicator, Image, Text, View, TextInput, TouchableOpacity,
   FlatList, Modal, KeyboardAvoidingView,
   TouchableWithoutFeedback, Alert, ScrollView,
   ImageBackground,
 } from 'react-native';
+
+import { onAuthStateChanged, signOut, type User } from "firebase/auth";
+import * as ImagePicker from "expo-image-picker";
 
 import Animated, {
   FadeIn, FadeOut, ZoomIn, ZoomOut,
@@ -13,27 +17,43 @@ import Animated, {
   SlideOutLeft,
 } from 'react-native-reanimated';
 
-import {
-  startDB, createCard, getCards, updateCard, deleteCard,
-  createNote, getNotesByCard, updateNote, deleteNote, getNoteCount
-} from "./src/database";
+import { AuthScreen } from "./src/components/AuthScreen";
+import { CardIconPicker } from "./src/components/CardIconPicker";
 
 import { styles } from "./styles";
+import { auth } from "./src/services/firebase";
+import { enviarImagemImgBB } from "./src/services/imgbb";
+
+import { observarCards, criarCards, criarNotes,
+  atualizarCards, atualizarNotes, excluirNotes, excluirCards,
+  observarNotesPorCard, type CardIcon,
+  atualizarImagemNote
+ } from "./src/database/firestore";
 
 type Card = {
   id: string,
   titulo: string,
+  icon: CardIcon,
 };
 
 type Note = {
   id: string,
-  cardId: string,
+  card_id: string,
   titulo: string,
   descricao: string,
+  imagemUrl?: string,
+};
+
+const cardIconGlyphs: Record<CardIcon, string> = {
+  star: "⭐",
+  checklist: "✅",
+  calendar: "📅",
 };
 
 export default function App() {
 
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [cards, setCards] = useState<Card[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
@@ -45,74 +65,86 @@ export default function App() {
   const [modalEditor, setModalEditor] = useState(false);
   const [descricao, setDescricao] = useState('');
   const [titulo, setTitulo] = useState('');
+  const [selectedCardIcon, setSelectedCardIcon] = useState<CardIcon | null>(null);
 
   useEffect(() => {
-    async function load() {
-      try {
-        await startDB();
-        await loadCards();
-      } catch (error) {
-        console.error("Erro:", error);
-      }
+    return onAuthStateChanged(auth, (authenticatedUser) => {
+      setUser(authenticatedUser);
+      setIsAuthLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setCards([]);
+      setNotes([]);
+      return;
     }
 
-    load()
-  }, []);
+    setCards([]);
+    return observarCards(user.uid, setCards);
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || !selectedCardId) {
+      setNotes([]);
+      return;
+    }
+
+    return observarNotesPorCard(user.uid, selectedCardId, setNotes);
+  }, [user, selectedCardId]);
+
+  if (isAuthLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#8B6F47" />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return (
+      <ImageBackground
+        source={require("./assets/bg-crystal.png")}
+        style={styles.background}
+        resizeMode="cover"
+        imageStyle={styles.image}
+      >
+        <View style={styles.overlay}>
+          <AuthScreen />
+        </View>
+      </ImageBackground>
+    );
+  }
 
   function handleLongPress(card: Card) {
     setEditedCard(card);
     setModalOptions(true);
   }
 
-  async function loadCards() {
-    try {
-
-      const data = await getCards();
-      setCards(data);
-    } catch (error) {
-      Alert.alert("Erro", "" + error);
-      console.error("ERRO:", error);
-    }
-  }
-
-  async function loadNotes(cardId: string) {
-    try {
-      const data = await getNotesByCard(cardId);
-      setNotes(data);
-    } catch (error) {
-      Alert.alert("Erro", "" + error);
-      console.error("ERRO: ", error);
-    }
-  }
-
   async function handleCreateCard() {
-    if (!titulo.trim()) {
+    if (!user || !titulo.trim() || !selectedCardIcon) {
+      if (!selectedCardIcon) {
+        Alert.alert("Ícone obrigatório", "Escolha um ícone para o card.");
+      }
       return;
     }
 
     try {
-      await createCard(titulo);
-      await loadCards();
-
+      await criarCards(titulo, user.uid, selectedCardIcon);
       setTitulo('');
+      setSelectedCardIcon(null);
       setModalNewCard(false);
 
     } catch (error) {
-      console.error("Erro: ", error);
+      Alert.alert("Erro", "Não foi possível criar o card. Tente novamente.");
+      console.error("Erro ao criar card:", error);
     }
   }
 
   async function handleDeleteCard(id: string) {
     try {
-      const counter = await getNoteCount(id);
-
-      if (counter > 0) {
-        Alert.alert("AVISO!", "Para deletar um card delete as notas anexadas a ele.");
-        return;
-      }
-
-      await deleteCard(id);
-      await loadCards();
+      await excluirCards(id);
       Alert.alert("Sucesso!", "Card deletado do banco de dados.");
     } catch (error) {
       Alert.alert("ERRO", "" + error);
@@ -127,9 +159,8 @@ export default function App() {
     }
 
     try {
-      await updateCard(id, titulo);
+      await atualizarCards(id, titulo);
       setTitulo("");
-      await loadCards();
     } catch (error) {
       Alert.alert("ERRO:", "" + error);
       console.error("ERRO: ", error);
@@ -142,20 +173,55 @@ export default function App() {
     setEditandoNota(false);
     setNotaEditandoId(null);
 
-    await loadNotes(cardId);
     setSelectedCardId(cardId);
   }
 
+  async function handlePickNoteImage( noteId: string) {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.8,
+        base64: true,
+      });
+
+      if (!result.canceled) {
+        const image = result.assets[0];
+        if (!image.base64) {
+          Alert.alert("Erro", "Não foi possível carregar a imagem selecionada.");
+          console.log("Erro ao carregar a imagem");
+          return;
+        }
+        
+        const imageUrl = await enviarImagemImgBB(image.base64);
+
+        await atualizarImagemNote(noteId, imageUrl);
+        Alert.alert("Imagem atualizada");
+      }
+      return;
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível abrir a galeria.");
+      console.error("Erro ao selecionar imagem:", error);
+    }
+  }
+
   async function handleSaveNote() {
-    if (!descricao.trim() || selectedCardId === null || !titulo.trim()) {
+    if (
+      !user ||
+      !descricao.trim() ||
+      selectedCardId === null ||
+      !titulo.trim()
+    ) {
       return;
     }
 
     try {
       if (editandoNota && notaEditandoId !== null) {
-        await updateNote(notaEditandoId, descricao, titulo);
-        await loadNotes(selectedCardId);
-
+        await atualizarNotes(notaEditandoId, {
+          descricao,
+          titulo,
+        });
         setDescricao('');
         setTitulo('');
         setEditandoNota(false);
@@ -166,15 +232,13 @@ export default function App() {
         return;
       }
 
-      await createNote(selectedCardId, descricao, titulo);
-
-      await loadNotes(selectedCardId);
+      await criarNotes(user.uid, selectedCardId, titulo, descricao, null);
 
       setDescricao('');
       setTitulo('');
 
     } catch (error) {
-      Alert.alert("Erro", "" + error);
+      Alert.alert("Erro", "Não foi possível salvar a nota ou sua imagem.");
       console.error("ERRO:", error);
     }
   }
@@ -185,11 +249,19 @@ export default function App() {
     }
 
     try {
-      await deleteNote(id);
-      await loadNotes(selectedCardId);
+      await excluirNotes(id);
     } catch (error) {
       Alert.alert("Erro", "" + error);
       console.error("Erro: ", error);
+    }
+  }
+
+  async function handleSignOut() {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível sair da conta. Tente novamente.");
+      console.error("Erro ao sair:", error);
     }
   }
 
@@ -203,9 +275,25 @@ export default function App() {
         <View style={styles.overlay}>
           <View style={styles.container}>
             <Text style={styles.title}>NotePad</Text>
+            <View style={styles.headerRow}>
+              <Text style={styles.userEmail} numberOfLines={1}>
+                {user.email ?? "E-mail não disponível"}
+              </Text>
+              <TouchableOpacity
+                style={styles.signOutButton}
+                onPress={handleSignOut}
+                accessibilityRole="button"
+                accessibilityLabel="Sair da conta"
+              >
+                <Text style={styles.signOutText}>Sair</Text>
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity
               style={styles.addButton}
-              onPress={() => setModalNewCard(true)}
+              onPress={() => {
+                setSelectedCardIcon(null);
+                setModalNewCard(true);
+              }}
             >
               <Text style={styles.addButtonText}>+ Novo Card</Text>
             </TouchableOpacity>
@@ -220,6 +308,11 @@ export default function App() {
                       onPress={() => handleNote(item.id)}
                       onLongPress={() => handleLongPress(item)}
                       delayLongPress={500}>
+                      <View style={styles.cardIconContainer}>
+                        <Text style={styles.cardIcon}>
+                          {cardIconGlyphs[item.icon ?? "star"]}
+                        </Text>
+                      </View>
                       <Text style={styles.cardTitle}>
                         {item.titulo}
                       </Text>
@@ -260,57 +353,81 @@ export default function App() {
                           showsVerticalScrollIndicator={true}>
                           {notes.map((note) => (
                             <View key={note.id} style={styles.noteItem}>
-                              <Text style={styles.noteTitle}>
-                                {note.titulo}
-                              </Text>
-                              <Text style={styles.noteText}>
-                                {note.descricao}
-                              </Text>
+                              <View style={styles.noteRow}>
 
-                              <TouchableOpacity
-                                style={styles.deleteNoteButton}
-                                onPress={() => { handleDeleteNote(note.id) }}
-                              >
-                                <Text style={styles.deleteNoteButtonText}>
-                                  Excluir
-                                </Text>
-                              </TouchableOpacity>
+                                {/*imagem*/}
+                                <View style={styles.noteImagePlaceholder}>
+                                  <TouchableOpacity
+                                  style={styles.imagePickerButton}
+                                  onPress={() => handlePickNoteImage(note.id)}
+                                  accessibilityRole="button"
+                                  accessibilityLabel="Selecionar imagem da galeria para a nota"
+                                  >
+                                    {note.imagemUrl ? (
+                                      <Image
+                                        source={{ uri: note.imagemUrl }}
+                                        style={styles.selectedNoteImage}
+                                      />
+                                    ) : (
+                                      <>
+                                        <Text style={styles.noteImageGlyph}>▧</Text>
+                                        <Text style={styles.noteImageLabel}>Sem imagem</Text>
+                                      </>
+                                    )}
+                                  </TouchableOpacity>
+                                </View>
 
-                              <TouchableOpacity
-                                style={styles.updateNoteButton}
-                                onPress={() => {
-                                  setEditandoNota(true)
-                                  setNotaEditandoId(note.id);
-                                  setDescricao(note.descricao)
-                                  setTitulo(note.titulo)
-                                }}
-                              >
-                                <Text style={styles.updateNoteButtonText}>
-                                  Editar
-                                </Text>
-                              </TouchableOpacity>
+                                <View style={styles.noteContent}>
+                                  <Text style={styles.noteTitle}>{note.titulo}</Text>
+                                  <Text style={styles.noteText}>{note.descricao}</Text>
+                                  <View style={styles.noteActions}>
+                                    <TouchableOpacity
+                                      style={styles.deleteNoteButton}
+                                      onPress={() => { handleDeleteNote(note.id) }}
+                                    >
+                                      <Text style={styles.deleteNoteButtonText}>Excluir</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                      style={styles.updateNoteButton}
+                                      onPress={() => {
+                                        setEditandoNota(true);
+                                        setNotaEditandoId(note.id);
+                                        setDescricao(note.descricao);
+                                        setTitulo(note.titulo);
+                                        
+                                      }}
+                                    >
+                                      <Text style={styles.updateNoteButtonText}>Editar</Text>
+                                    </TouchableOpacity>
+                                  </View>
+                                </View>
+                              </View>
                             </View>
                           ))}
                         </ScrollView>
 
                         {/* Nova nota */}
-                        <TextInput
-                          style={styles.noteTitleInput}
-                          placeholder="Titulo para a Nota"
-                          placeholderTextColor="#999"
-                          value={titulo}
-                          onChangeText={setTitulo}
-                        />
-
-                        <TextInput
-                          style={styles.textArea}
-                          placeholder="Digite sua nota..."
-                          placeholderTextColor="#999"
-                          value={descricao}
-                          onChangeText={setDescricao}
-                          multiline
-                          textAlignVertical="top"
-                        />
+                        <View style={styles.noteComposerRow}>
+                          <View style={styles.noteComposerFields}>
+                            <TextInput
+                              style={[styles.noteTitleInput, styles.noteTitleInputInRow]}
+                              placeholder="Titulo para a Nota"
+                              placeholderTextColor="#999"
+                              value={titulo}
+                              onChangeText={setTitulo}
+                            />
+                            <TextInput
+                              style={[styles.textArea, styles.textAreaInRow]}
+                              placeholder="Digite sua nota..."
+                              placeholderTextColor="#999"
+                              value={descricao}
+                              onChangeText={setDescricao}
+                              multiline
+                              textAlignVertical="top"
+                            />
+                          </View>
+                        </View>
 
                         <TouchableOpacity
                           style={styles.button}
@@ -335,7 +452,10 @@ export default function App() {
               visible={modalNewCard}
               transparent
               animationType="none"
-              onRequestClose={() => setModalNewCard(false)}
+              onRequestClose={() => {
+                setModalNewCard(false);
+                setSelectedCardIcon(null);
+              }}
             >
               <View style={styles.modalOverlay}>
 
@@ -355,10 +475,19 @@ export default function App() {
                     onChangeText={setTitulo}
                   />
 
+                  <Text style={styles.inputLabel}>Ícone do card</Text>
+                  <CardIconPicker
+                    selectedIcon={selectedCardIcon}
+                    onSelect={setSelectedCardIcon}
+                  />
+
                   <View style={styles.modalButtons}>
                     <TouchableOpacity
                       style={styles.cancelButton}
-                      onPress={() => setModalNewCard(false)}
+                      onPress={() => {
+                        setModalNewCard(false);
+                        setSelectedCardIcon(null);
+                      }}
                     >
                       <Text style={styles.cancelButtonText}>Cancelar</Text>
                     </TouchableOpacity>

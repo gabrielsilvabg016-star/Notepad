@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import {initializeAuth} from "firebase/auth";
+import { inMemoryPersistence, initializeAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -12,7 +12,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = initializeAuth(app);
+const auth = initializeAuth(app, { persistence: inMemoryPersistence });
 const db = getFirestore(app);
 
 export {auth, db};

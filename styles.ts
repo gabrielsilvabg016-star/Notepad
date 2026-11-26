@@ -46,8 +46,8 @@ export const styles = StyleSheet.create({
     userEmail: {
         color: '#B8C5D4',
         fontSize: 13,
-        marginTop: -14,
-        marginBottom: 16,
+        flex: 1,
+        marginRight: 12,
     },
 
     signOutButton: {
@@ -56,7 +56,6 @@ export const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#465363',
         borderRadius: 4,
-        marginBottom: 20,
     },
 
     signOutText: {
@@ -239,6 +238,134 @@ export const styles = StyleSheet.create({
         marginBottom: 12,
     },
 
+    notesList: {
+        marginBottom: 15,
+        maxHeight: 300,
+    },
+
+    notesListContent: {
+        paddingBottom: 10,
+    },
+
+    noteItem: {
+        backgroundColor: '#101923',
+        borderWidth: 1,
+        borderColor: '#35465A',
+        borderRadius: 4,
+        padding: 13,
+        marginBottom: 9,
+    },
+
+    noteRow: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+    },
+
+    noteImagePlaceholder: {
+        width: 64,
+        height: 64,
+        minHeight: 64,
+        marginRight: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 4,
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        borderColor: '#60758A',
+        backgroundColor: '#182333',
+    },
+
+    noteImageGlyph: {
+        color: '#B8C5D4',
+        fontSize: 20,
+        lineHeight: 22,
+    },
+
+    noteImageLabel: {
+        color: '#9CA3AF',
+        fontSize: 10,
+    },
+
+    noteContent: {
+        flex: 1,
+    },
+
+    noteText: {
+        fontSize: 14,
+        lineHeight: 21,
+        color: '#C7D0DA',
+        marginBottom: 10,
+    },
+
+    checklistItems: {
+        marginBottom: 10,
+    },
+
+    checklistItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        minHeight: 36,
+        paddingVertical: 5,
+    },
+
+    checklistCheck: {
+        color: '#D5DDE5',
+        fontSize: 20,
+        marginRight: 10,
+    },
+
+    checklistItemText: {
+        flex: 1,
+        color: '#C7D0DA',
+        fontSize: 14,
+        lineHeight: 20,
+    },
+
+    checklistItemChecked: {
+        color: '#8794A3',
+        textDecorationLine: 'line-through',
+    },
+
+    noteActions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        gap: 8,
+    },
+
+    deleteNoteButton: {
+        alignSelf: 'flex-end',
+        backgroundColor: '#302126',
+        paddingVertical: 7,
+        paddingHorizontal: 11,
+        borderRadius: 4,
+
+        borderWidth: 1,
+        borderColor: '#74464B',
+    },
+
+    deleteNoteButtonText: {
+        color: '#D98B8B',
+        fontSize: 12,
+        fontWeight: '700',
+    },
+
+    updateNoteButton: {
+        alignSelf: 'flex-end',
+        backgroundColor: '#1D3440',
+        paddingVertical: 7,
+        paddingHorizontal: 11,
+        borderRadius: 4,
+
+        borderWidth: 1,
+        borderColor: '#4C8295',
+    },
+
+    updateNoteButtonText: {
+        color: '#8FC6D4',
+        fontSize: 12,
+        fontWeight: '700',
+    },
+
     noteTitleInput: {
         height: 48,
         backgroundColor: '#101923',
@@ -253,12 +380,23 @@ export const styles = StyleSheet.create({
 
     noteComposerRow: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'stretch',
         gap: 10,
+    },
+
+    noteComposerFields: {
+        flex: 1,
+        gap: 8,
     },
 
     noteTitleInputInRow: {
         flex: 1,
+    },
+
+    textAreaInRow: {
+        flex: 1,
+        minHeight: 82,
+        padding: 10,
     },
 
     textArea: {
@@ -448,127 +586,6 @@ export const styles = StyleSheet.create({
         fontWeight: '700',
     },
 
-    notesList: {
-        marginBottom: 15,
-        maxHeight: 300,
-    },
-
-    notesListContent: {
-        paddingBottom: 10,
-    },
-
-    noteItem: {
-        backgroundColor: '#101923',
-        borderWidth: 1,
-        borderColor: '#35465A',
-        borderRadius: 4,
-        padding: 13,
-        marginBottom: 9,
-    },
-
-    noteRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-    },
-
-    noteImagePlaceholder: {
-        width: 64,
-        minHeight: 64,
-        marginRight: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 4,
-        borderWidth: 1,
-        borderStyle: 'dashed',
-        borderColor: '#60758A',
-        backgroundColor: '#182333',
-    },
-
-    noteImageGlyph: {
-        color: '#B8C5D4',
-        fontSize: 20,
-        lineHeight: 22,
-    },
-
-    noteImageLabel: {
-        color: '#9CA3AF',
-        fontSize: 10,
-    },
-
-    noteContent: {
-        flex: 1,
-    },
-
-    noteText: {
-        fontSize: 14,
-        lineHeight: 21,
-        color: '#C7D0DA',
-        marginBottom: 10,
-    },
-
-    checklistItems: {
-        marginBottom: 10,
-    },
-
-    checklistItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        minHeight: 36,
-        paddingVertical: 5,
-    },
-
-    checklistCheck: {
-        color: '#D5DDE5',
-        fontSize: 20,
-        marginRight: 10,
-    },
-
-    checklistItemText: {
-        flex: 1,
-        color: '#C7D0DA',
-        fontSize: 14,
-        lineHeight: 20,
-    },
-
-    checklistItemChecked: {
-        color: '#8794A3',
-        textDecorationLine: 'line-through',
-    },
-
-    deleteNoteButton: {
-        alignSelf: 'flex-end',
-        backgroundColor: '#302126',
-        paddingVertical: 7,
-        paddingHorizontal: 11,
-        borderRadius: 4,
-
-        borderWidth: 1,
-        borderColor: '#74464B',
-    },
-
-    deleteNoteButtonText: {
-        color: '#D98B8B',
-        fontSize: 12,
-        fontWeight: '700',
-    },
-
-    updateNoteButton: {
-        alignSelf: 'flex-end',
-        backgroundColor: '#1D3440',
-        paddingVertical: 7,
-        paddingHorizontal: 11,
-        borderRadius: 4,
-
-        borderWidth: 1,
-        borderColor: '#4C8295',
-    },
-
-    updateNoteButtonText: {
-        color: '#8FC6D4',
-        fontSize: 12,
-        fontWeight: '700',
-    },
-
     cardOptionsContainer: {
         width: '88%',
         backgroundColor: '#182333',
@@ -624,6 +641,7 @@ export const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         padding: 20,
+        backgroundColor: 'transparent',
     },
 
     authCard: {

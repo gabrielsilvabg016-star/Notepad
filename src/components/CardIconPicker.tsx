@@ -11,7 +11,7 @@ const iconOptions: { value: CardIcon; glyph: string; label: string }[] = [
 ];
 
 type Props = {
-  selectedIcon: CardIcon;
+  selectedIcon: CardIcon | null;
   onSelect: (icon: CardIcon) => void;
 };
 
