@@ -202,7 +202,7 @@ export const styles = StyleSheet.create({
     noteContainer: {
         backgroundColor: '#182333',
         marginTop: 15,
-        padding: 18,
+        padding: 20,
         borderRadius: 5,
         width: '94%',
 
@@ -223,7 +223,7 @@ export const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '700',
         color: '#F0E2BD',
-        marginBottom: 13,
+        marginBottom: 16,
         letterSpacing: 0.4,
     },
 
@@ -239,12 +239,12 @@ export const styles = StyleSheet.create({
     },
 
     notesList: {
-        marginBottom: 15,
+        marginBottom: 18,
         maxHeight: 300,
     },
 
     notesListContent: {
-        paddingBottom: 10,
+        paddingBottom: 12,
     },
 
     noteItem: {
@@ -252,8 +252,8 @@ export const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#35465A',
         borderRadius: 4,
-        padding: 13,
-        marginBottom: 9,
+        padding: 16,
+        marginBottom: 12,
     },
 
     noteRow: {
@@ -262,10 +262,10 @@ export const styles = StyleSheet.create({
     },
 
     noteImagePlaceholder: {
-        width: 64,
-        height: 64,
-        minHeight: 64,
-        marginRight: 12,
+        width: 88,
+        height: 88,
+        minHeight: 88,
+        marginRight: 20,
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 4,
@@ -290,11 +290,17 @@ export const styles = StyleSheet.create({
         flex: 1,
     },
 
+    noteDate: {
+        color: '#9CA3AF',
+        fontSize: 12,
+        marginBottom: 8,
+    },
+
     noteText: {
         fontSize: 14,
         lineHeight: 21,
         color: '#C7D0DA',
-        marginBottom: 10,
+        marginBottom: 12,
     },
 
     checklistItems: {
@@ -328,8 +334,10 @@ export const styles = StyleSheet.create({
 
     noteActions: {
         flexDirection: 'row',
+        flexWrap: 'wrap',
         justifyContent: 'flex-end',
-        gap: 8,
+        gap: 10,
+        marginTop: 8,
     },
 
     deleteNoteButton: {
@@ -367,7 +375,7 @@ export const styles = StyleSheet.create({
     },
 
     noteTitleInput: {
-        height: 48,
+        height: 56,
         backgroundColor: '#101923',
         borderWidth: 1,
         borderColor: '#465A70',
@@ -381,12 +389,12 @@ export const styles = StyleSheet.create({
     noteComposerRow: {
         flexDirection: 'row',
         alignItems: 'stretch',
-        gap: 10,
+        gap: 14,
     },
 
     noteComposerFields: {
         flex: 1,
-        gap: 8,
+        gap: 12,
     },
 
     noteTitleInputInRow: {
@@ -395,8 +403,8 @@ export const styles = StyleSheet.create({
 
     textAreaInRow: {
         flex: 1,
-        minHeight: 82,
-        padding: 10,
+        minHeight: 96,
+        padding: 12,
     },
 
     textArea: {
@@ -454,7 +462,7 @@ export const styles = StyleSheet.create({
     },
 
     button: {
-        marginTop: 13,
+        marginTop: 16,
         backgroundColor: '#536F8C',
         paddingVertical: 14,
         borderRadius: 4,

@@ -42,6 +42,7 @@ type Note = {
   titulo: string,
   descricao: string,
   imagemUrl?: string,
+  data: Date | null,
 };
 
 const cardIconGlyphs: Record<CardIcon, string> = {
@@ -49,6 +50,64 @@ const cardIconGlyphs: Record<CardIcon, string> = {
   checklist: "✅",
   calendar: "📅",
 };
+
+function formatDateInput(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+
+  if (digits.length > 4) {
+    return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+  }
+
+  if (digits.length > 2) {
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  }
+
+  return digits;
+}
+
+function formatDateForInput(date: Date | null) {
+  if (!date) {
+    return "";
+  }
+
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = String(date.getFullYear()).padStart(4, "0");
+
+  return `${day}/${month}/${year}`;
+}
+
+function parseNoteDate(value: string): Date | null | undefined {
+  if (!value.trim()) {
+    return null;
+  }
+
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value);
+  if (!match) {
+    return undefined;
+  }
+
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+  if (year < 1) {
+    return undefined;
+  }
+
+  const date = new Date(0);
+  date.setFullYear(year, month - 1, day);
+  date.setHours(0, 0, 0, 0);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return undefined;
+  }
+
+  return date;
+}
 
 export default function App() {
 
@@ -65,6 +124,7 @@ export default function App() {
   const [modalEditor, setModalEditor] = useState(false);
   const [descricao, setDescricao] = useState('');
   const [titulo, setTitulo] = useState('');
+  const [dataNota, setDataNota] = useState('');
   const [selectedCardIcon, setSelectedCardIcon] = useState<CardIcon | null>(null);
 
   useEffect(() => {
@@ -170,6 +230,7 @@ export default function App() {
   async function handleNote(cardId: string) {
     setDescricao('');
     setTitulo('');
+    setDataNota('');
     setEditandoNota(false);
     setNotaEditandoId(null);
 
@@ -216,14 +277,25 @@ export default function App() {
       return;
     }
 
+    const noteDate = parseNoteDate(dataNota);
+    if (noteDate === undefined) {
+      Alert.alert(
+        "Data inválida",
+        "Digite uma data válida no formato dd/mm/aaaa.",
+      );
+      return;
+    }
+
     try {
       if (editandoNota && notaEditandoId !== null) {
         await atualizarNotes(notaEditandoId, {
           descricao,
           titulo,
+          data: noteDate,
         });
         setDescricao('');
         setTitulo('');
+        setDataNota('');
         setEditandoNota(false);
         setNotaEditandoId(null);
 
@@ -232,10 +304,11 @@ export default function App() {
         return;
       }
 
-      await criarNotes(user.uid, selectedCardId, titulo, descricao, null);
+      await criarNotes(user.uid, selectedCardId, titulo, descricao, noteDate);
 
       setDescricao('');
       setTitulo('');
+      setDataNota('');
 
     } catch (error) {
       Alert.alert("Erro", "Não foi possível salvar a nota ou sua imagem.");
@@ -353,9 +426,8 @@ export default function App() {
                           showsVerticalScrollIndicator={true}>
                           {notes.map((note) => (
                             <View key={note.id} style={styles.noteItem}>
-                              <View style={styles.noteRow}>
 
-                                {/*imagem*/}
+                            {/*imagem*/}
                                 <View style={styles.noteImagePlaceholder}>
                                   <TouchableOpacity
                                   style={styles.imagePickerButton}
@@ -376,9 +448,15 @@ export default function App() {
                                     )}
                                   </TouchableOpacity>
                                 </View>
-
+                              
+                              <View style={styles.noteRow}>
                                 <View style={styles.noteContent}>
                                   <Text style={styles.noteTitle}>{note.titulo}</Text>
+                                  {note.data ? (
+                                    <Text style={styles.noteDate}>
+                                      Data: {formatDateForInput(note.data)}
+                                    </Text>
+                                  ) : null}
                                   <Text style={styles.noteText}>{note.descricao}</Text>
                                   <View style={styles.noteActions}>
                                     <TouchableOpacity
@@ -395,10 +473,22 @@ export default function App() {
                                         setNotaEditandoId(note.id);
                                         setDescricao(note.descricao);
                                         setTitulo(note.titulo);
+                                        setDataNota(formatDateForInput(note.data));
                                         
                                       }}
                                     >
                                       <Text style={styles.updateNoteButtonText}>Editar</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                      style={styles.updateNoteButton}
+                                      disabled
+                                      accessibilityRole="button"
+                                      accessibilityLabel="Calendario I.A, em breve"
+                                    >
+                                      <Text style={styles.updateNoteButtonText}>
+                                        Calendario I.A
+                                      </Text>
                                     </TouchableOpacity>
                                   </View>
                                 </View>
@@ -416,6 +506,16 @@ export default function App() {
                               placeholderTextColor="#999"
                               value={titulo}
                               onChangeText={setTitulo}
+                            />
+                            <TextInput
+                              style={[styles.noteTitleInput, styles.noteTitleInputInRow]}
+                              placeholder="Data (dd/mm/aaaa)"
+                              placeholderTextColor="#999"
+                              value={dataNota}
+                              onChangeText={(value) => setDataNota(formatDateInput(value))}
+                              keyboardType="numeric"
+                              maxLength={10}
+                              accessibilityLabel="Data da nota, dia, mês e ano"
                             />
                             <TextInput
                               style={[styles.textArea, styles.textAreaInRow]}

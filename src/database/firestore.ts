@@ -10,6 +10,8 @@ import {
     updateDoc,
     deleteDoc,
     getDocs,
+    serverTimestamp,
+    orderBy,
 } from "firebase/firestore";
 
 import { Alert } from "react-native";
@@ -21,6 +23,7 @@ export type Card = {
     titulo: string;
     icon: CardIcon;
     iconeUrl?: string;
+    createdAt: Date | null;
 };
 
 export type Note = {
@@ -30,6 +33,7 @@ export type Note = {
     descricao: string;
     data: Date | null;
     imagemUrl?: string;
+    createdAt: Date | null;
 };
 
 const cardCollectionRef = collection(db, "Cards");
@@ -51,6 +55,7 @@ export const criarCards = async (
         userId,
         icon,
         iconeUrl: iconeUrl || "",
+        createdAt: serverTimestamp(),
     });
 };
 
@@ -60,7 +65,7 @@ export const criarNotes = async (
     titulo: string,
     descricao: string,
     data: Date | null,
-    imagemUrl?: string
+    imagemUrl?: string,
 ) => {
     await addDoc(noteCollectionRef, {
         descricao,
@@ -68,7 +73,8 @@ export const criarNotes = async (
         card_id: cardId,
         titulo,
         data,
-        imagemUrl: imagemUrl || ""
+        imagemUrl: imagemUrl || "",
+        createdAt: serverTimestamp(),
     });
 };
 
@@ -92,7 +98,8 @@ export const observarCards = (
             id: documento.id,
             titulo: documento.data().titulo,
             icon: documento.data().icon || "star",
-            iconeUrl: documento.data().iconeUrl || ""
+            iconeUrl: documento.data().iconeUrl || "",
+            createdAt: documento.data().createdAt?.toDate() || null,
         }));
 
         callback(listaCards);
@@ -106,23 +113,35 @@ export const observarNotesPorCard = (
     cardId: string,
     callback: (notes: Note[]) => void
 ) => {
-    const q = query(noteCollectionRef, where("userId", "==", userId), where("card_id", "==", cardId));
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        const listaNotes: Note[] = snapshot.docs.map((documento) => ({
-            id: documento.id,
-            card_id: documento.data().card_id,
-            titulo: documento.data().titulo,
-            descricao: documento.data().descricao,
-            data: documento.data().data?.toDate() || null,
-            imagemUrl: documento.data().imagemUrl || ""
-        }));
+    const q = query(
+        noteCollectionRef,
+        where("userId", "==", userId),
+        where("card_id", "==", cardId),
+        orderBy("createdAt", "desc")
+    );
 
-        callback(listaNotes);
-    })
+    const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+            const listaNotes: Note[] = snapshot.docs.map((documento) => ({
+                id: documento.id,
+                card_id: documento.data().card_id,
+                titulo: documento.data().titulo,
+                descricao: documento.data().descricao,
+                data: documento.data().data?.toDate() || null,
+                imagemUrl: documento.data().imagemUrl || "",
+                createdAt: documento.data().createdAt?.toDate() || null,
+            }));
+
+            callback(listaNotes);
+        },
+        (error) => {
+            console.error("Erro ao observar notas:", error.code, error.message);
+        }
+    );
 
     return unsubscribe;
-}
+};
 
 // ==============================
 // UPDATE
