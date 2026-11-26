@@ -397,10 +397,6 @@ export const styles = StyleSheet.create({
         gap: 12,
     },
 
-    noteTitleInputInRow: {
-        flex: 1,
-    },
-
     textAreaInRow: {
         flex: 1,
         minHeight: 96,
@@ -421,6 +417,7 @@ export const styles = StyleSheet.create({
     },
 
     imagePickerButton: {
+        top:3,
         width: 88,
         height: 88,
         marginBottom: 6,

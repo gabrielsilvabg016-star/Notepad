@@ -29,7 +29,8 @@
           "photosPermission": "O NotePad precisa acessar sua galeria para adicionar imagens às notas.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "expo-status-bar"
     ]
   }
 }

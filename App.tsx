@@ -242,7 +242,7 @@ export default function App() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsEditing: true,
-        aspect: [16, 9],
+        aspect: [8, 9],
         quality: 0.8,
         base64: true,
       });
@@ -480,16 +480,19 @@ export default function App() {
                                       <Text style={styles.updateNoteButtonText}>Editar</Text>
                                     </TouchableOpacity>
 
+                                    {/*Gemini aqui*/}
                                     <TouchableOpacity
                                       style={styles.updateNoteButton}
                                       disabled
                                       accessibilityRole="button"
-                                      accessibilityLabel="Calendario I.A, em breve"
+                                      accessibilityLabel="Calendario I.A"
                                     >
                                       <Text style={styles.updateNoteButtonText}>
                                         Calendario I.A
                                       </Text>
                                     </TouchableOpacity>
+
+
                                   </View>
                                 </View>
                               </View>
@@ -501,21 +504,21 @@ export default function App() {
                         <View style={styles.noteComposerRow}>
                           <View style={styles.noteComposerFields}>
                             <TextInput
-                              style={[styles.noteTitleInput, styles.noteTitleInputInRow]}
+                              style={[styles.noteTitleInput]}
                               placeholder="Titulo para a Nota"
                               placeholderTextColor="#999"
                               value={titulo}
                               onChangeText={setTitulo}
                             />
                             <TextInput
-                              style={[styles.noteTitleInput, styles.noteTitleInputInRow]}
+                              style={[styles.noteTitleInput]}
                               placeholder="Data (dd/mm/aaaa)"
                               placeholderTextColor="#999"
                               value={dataNota}
                               onChangeText={(value) => setDataNota(formatDateInput(value))}
                               keyboardType="numeric"
                               maxLength={10}
-                              accessibilityLabel="Data da nota, dia, mês e ano"
+                              accessibilityLabel="Data, dia, mês e ano"
                             />
                             <TextInput
                               style={[styles.textArea, styles.textAreaInRow]}
