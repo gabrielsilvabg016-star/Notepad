@@ -171,7 +171,6 @@ export const atualizarCards = async (
     await updateDoc(cardRef, dadosAtualizados);
 };
 
-
 export const atualizarNotes = async (
     noteId: string,
     dados: {
@@ -223,11 +222,6 @@ export const excluirNotes = async (
 // ==============================
 // IMGBB
 // ==============================
-
-export const atualizarImagemCard = async(id: string, iconeUrl: string) => {
-    const cardRef = doc(db, 'Cards', id);
-    await updateDoc(cardRef, {iconeUrl});
-};
 
 export const atualizarImagemNote = async(id: string, imagemUrl: string) => {
     const noteRef = doc(db, 'Notes', id);

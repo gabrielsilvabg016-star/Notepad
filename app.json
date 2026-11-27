@@ -22,12 +22,17 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-sqlite",
       [
         "expo-image-picker",
         {
           "photosPermission": "O NotePad precisa acessar sua galeria para adicionar imagens às notas.",
           "microphonePermission": false
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "O aplicativo precisa de acesso ao calendário para salvar os eventos das suas notas."
         }
       ],
       "expo-status-bar"

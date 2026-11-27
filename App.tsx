@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
 
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+import { analisarNotaComGemini, NotaExtraida } from './src/services/Gemini/gemini';
+import { NotaCalendarioModal } from "./src/services/Gemini/GeminiServices";
+
 import {
   ActivityIndicator, Image, Text, View, TextInput, TouchableOpacity,
   FlatList, Modal, KeyboardAvoidingView,
   TouchableWithoutFeedback, Alert, ScrollView,
   ImageBackground,
+  Platform,
 } from 'react-native';
 
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
@@ -24,11 +30,12 @@ import { styles } from "./styles";
 import { auth } from "./src/services/firebase";
 import { enviarImagemImgBB } from "./src/services/imgbb";
 
-import { observarCards, criarCards, criarNotes,
+import {
+  observarCards, criarCards, criarNotes,
   atualizarCards, atualizarNotes, excluirNotes, excluirCards,
   observarNotesPorCard, type CardIcon,
   atualizarImagemNote
- } from "./src/database/firestore";
+} from "./src/database/firestore";
 
 type Card = {
   id: string,
@@ -50,20 +57,6 @@ const cardIconGlyphs: Record<CardIcon, string> = {
   checklist: "✅",
   calendar: "📅",
 };
-
-function formatDateInput(value: string) {
-  const digits = value.replace(/\D/g, "").slice(0, 8);
-
-  if (digits.length > 4) {
-    return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
-  }
-
-  if (digits.length > 2) {
-    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
-  }
-
-  return digits;
-}
 
 function formatDateForInput(date: Date | null) {
   if (!date) {
@@ -125,7 +118,13 @@ export default function App() {
   const [descricao, setDescricao] = useState('');
   const [titulo, setTitulo] = useState('');
   const [dataNota, setDataNota] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCardIcon, setSelectedCardIcon] = useState<CardIcon | null>(null);
+  const [modalIA, setModalIA] = useState(false);
+  const [notaSelecionada, setNotaSelecionada] = useState<NotaExtraida | null>(null);
+  const [processandoIA, setProcessandoIA] = useState(false);
+
 
   useEffect(() => {
     return onAuthStateChanged(auth, (authenticatedUser) => {
@@ -237,7 +236,7 @@ export default function App() {
     setSelectedCardId(cardId);
   }
 
-  async function handlePickNoteImage( noteId: string) {
+  async function handlePickNoteImage(noteId: string) {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
@@ -254,7 +253,7 @@ export default function App() {
           console.log("Erro ao carregar a imagem");
           return;
         }
-        
+
         const imageUrl = await enviarImagemImgBB(image.base64);
 
         await atualizarImagemNote(noteId, imageUrl);
@@ -336,6 +335,42 @@ export default function App() {
       Alert.alert("Erro", "Não foi possível sair da conta. Tente novamente.");
       console.error("Erro ao sair:", error);
     }
+  }
+
+  function handleDatePicker() {
+    if (!showDatePicker) return null;
+
+    return (
+      <DateTimePicker
+        value={selectedDate}
+        mode="date"
+        display={Platform.OS === 'android' ? 'spinner' : 'default'}
+        onChange={(event, date) => {
+          setShowDatePicker(false);
+
+          if (event.type === 'set' && date) {
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+
+            const dataSelecionada = new Date(date);
+            dataSelecionada.setHours(0, 0, 0, 0);
+
+            if (dataSelecionada < hoje) {
+              Alert.alert("Data invalida", "A data não pode ser antes da data atual");
+              return;
+            }
+
+            setSelectedDate(date);
+
+            const dia = String(date.getDate()).padStart(2, '0');
+            const mes = String(date.getMonth() + 1).padStart(2, '0');
+            const ano = date.getFullYear();
+
+            setDataNota(`${dia}/${mes}/${ano}`);
+          }
+        }}
+      />
+    )
   }
 
   return (
@@ -427,28 +462,28 @@ export default function App() {
                           {notes.map((note) => (
                             <View key={note.id} style={styles.noteItem}>
 
-                            {/*imagem*/}
-                                <View style={styles.noteImagePlaceholder}>
-                                  <TouchableOpacity
+                              {/*imagem*/}
+                              <View style={styles.noteImagePlaceholder}>
+                                <TouchableOpacity
                                   style={styles.imagePickerButton}
                                   onPress={() => handlePickNoteImage(note.id)}
                                   accessibilityRole="button"
                                   accessibilityLabel="Selecionar imagem da galeria para a nota"
-                                  >
-                                    {note.imagemUrl ? (
-                                      <Image
-                                        source={{ uri: note.imagemUrl }}
-                                        style={styles.selectedNoteImage}
-                                      />
-                                    ) : (
-                                      <>
-                                        <Text style={styles.noteImageGlyph}>▧</Text>
-                                        <Text style={styles.noteImageLabel}>Sem imagem</Text>
-                                      </>
-                                    )}
-                                  </TouchableOpacity>
-                                </View>
-                              
+                                >
+                                  {note.imagemUrl ? (
+                                    <Image
+                                      source={{ uri: note.imagemUrl }}
+                                      style={styles.selectedNoteImage}
+                                    />
+                                  ) : (
+                                    <>
+                                      <Text style={styles.noteImageGlyph}>▧</Text>
+                                      <Text style={styles.noteImageLabel}>Sem imagem</Text>
+                                    </>
+                                  )}
+                                </TouchableOpacity>
+                              </View>
+
                               <View style={styles.noteRow}>
                                 <View style={styles.noteContent}>
                                   <Text style={styles.noteTitle}>{note.titulo}</Text>
@@ -460,10 +495,11 @@ export default function App() {
                                   <Text style={styles.noteText}>{note.descricao}</Text>
                                   <View style={styles.noteActions}>
                                     <TouchableOpacity
-                                      style={styles.deleteNoteButton}
+                                      style={[styles.deleteNoteButton, editandoNota && { backgroundColor: '#ccc' }]}
+                                      disabled={editandoNota}
                                       onPress={() => { handleDeleteNote(note.id) }}
                                     >
-                                      <Text style={styles.deleteNoteButtonText}>Excluir</Text>
+                                      <Text style={[styles.deleteNoteButtonText, editandoNota && { color: '#888' }]}>Excluir</Text>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
@@ -474,24 +510,47 @@ export default function App() {
                                         setDescricao(note.descricao);
                                         setTitulo(note.titulo);
                                         setDataNota(formatDateForInput(note.data));
-                                        
+
                                       }}
                                     >
                                       <Text style={styles.updateNoteButtonText}>Editar</Text>
                                     </TouchableOpacity>
 
-                                    {/*Gemini aqui*/}
+                                    {/*I.A aqui*/}
                                     <TouchableOpacity
-                                      style={styles.updateNoteButton}
-                                      disabled
-                                      accessibilityRole="button"
-                                      accessibilityLabel="Calendario I.A"
-                                    >
-                                      <Text style={styles.updateNoteButtonText}>
-                                        Calendario I.A
-                                      </Text>
-                                    </TouchableOpacity>
+                                      style={[
+                                        styles.updateNoteButton,
+                                        ((!note.data || editandoNota) || processandoIA) && { backgroundColor: '#ccc' }
+                                      ]}
+                                      disabled={!note.data || editandoNota || processandoIA}
+                                      onPress={async () => {
+                                        try {
+                                          setProcessandoIA(true);
 
+                                          const textoParaAnalisar = `Título: ${note.titulo || 'Sem título'}\nDescrição: ${note.descricao || note.data}\nData: ${note.data}`;
+
+                                          const notaExtraida = await analisarNotaComGemini(textoParaAnalisar);
+
+                                          setNotaSelecionada(notaExtraida);
+                                          setModalIA(true);
+                                        } catch (error: any) {
+                                          alert('Erro ao processar nota com a I.A: ' + (error.message || error));
+                                        } finally {
+                                          setProcessandoIA(false);
+                                        }
+                                      }}
+                                    >
+                                      {processandoIA ? (
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                                          <ActivityIndicator size="small" color="#FFFFFF" />
+                                          <Text style={[styles.updateNoteButtonText, { color: '#FFFFFF' }]}>Analisando...</Text>
+                                        </View>
+                                      ) : (
+                                        <Text style={[styles.updateNoteButtonText, (!note.data || editandoNota) && { color: '#888' }]}>
+                                          Calendario I.A
+                                        </Text>
+                                      )}
+                                    </TouchableOpacity>
 
                                   </View>
                                 </View>
@@ -510,16 +569,16 @@ export default function App() {
                               value={titulo}
                               onChangeText={setTitulo}
                             />
-                            <TextInput
-                              style={[styles.noteTitleInput]}
-                              placeholder="Data (dd/mm/aaaa)"
-                              placeholderTextColor="#999"
-                              value={dataNota}
-                              onChangeText={(value) => setDataNota(formatDateInput(value))}
-                              keyboardType="numeric"
-                              maxLength={10}
-                              accessibilityLabel="Data, dia, mês e ano"
-                            />
+
+                            <TouchableOpacity style={styles.noteTitleInput}
+                              onPress={() => setShowDatePicker(true)}>
+                              <Text style={{ color: '#999' }}>
+                                {dataNota || 'Data (DD/MM/AAAA)'}
+                              </Text>
+                            </TouchableOpacity>
+
+                            {handleDatePicker()}
+
                             <TextInput
                               style={[styles.textArea, styles.textAreaInRow]}
                               placeholder="Digite sua nota..."

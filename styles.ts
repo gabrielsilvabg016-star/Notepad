@@ -375,7 +375,7 @@ export const styles = StyleSheet.create({
     },
 
     noteTitleInput: {
-        height: 56,
+        height: 39,
         backgroundColor: '#101923',
         borderWidth: 1,
         borderColor: '#465A70',
